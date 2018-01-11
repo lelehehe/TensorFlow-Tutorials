@@ -2,24 +2,29 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 from sklearn.metrics import confusion_matrix
+from time import time
 
-print(tf.__version__)
+start_time = time()
+
+# print(tf.__version__)
+
+showPlot = False
 
 from tensorflow.examples.tutorials.mnist import input_data
 
 data = input_data.read_data_sets("data/MNIST", one_hot=True)
 
-print("Size of:")
-print("- Training-set:\t\t{}".format(len(data.train.labels)))
-print("- Test-set:\t\t{}".format(len(data.test.labels)))
-print("- Validation-set:\t{}".format(len(data.validation.labels)))
+# print("Size of:")
+# print("- Training-set:\t\t{}".format(len(data.train.labels)))
+# print("- Test-set:\t\t{}".format(len(data.test.labels)))
+# print("- Validation-set:\t{}".format(len(data.validation.labels)))
 
-print(data.test.labels[0:5, :])
+# print(data.test.labels[0:5, :])
 
 # mike: a typical way to regenerate a new array and lopp thru existing data
 data.test.cls = np.array([label.argmax() for label in data.test.labels])
 
-print(data.test.cls[0:5])
+# print(data.test.cls[0:5])
 
 # We know that MNIST images are 28 pixels in each dimension.
 img_size = 28
@@ -35,6 +40,9 @@ num_classes = 10
 
 
 def plot_images(images, cls_true, cls_pred=None):
+    if not showPlot:
+        return
+
     assert len(images) == len(cls_true) == 9
 
     # Create figure with 3x3 sub-plots.
@@ -89,7 +97,8 @@ cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_
 
 cost = tf.reduce_mean(cross_entropy)
 
-optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.5).minimize(cost)
+# optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.5).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=0.01).minimize(cost)
 
 correct_prediction = tf.equal(y_pred_cls, y_true_cls)
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
@@ -148,6 +157,9 @@ def print_confusion_matrix():
     # Print the confusion matrix as text.
     print(cm)
 
+    if not showPlot:
+        return
+
     # Plot the confusion matrix as an image.
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
 
@@ -192,6 +204,9 @@ def plot_example_errors():
 
 
 def plot_weights():
+    if not showPlot:
+        return
+
     # Get the values for the weights from the TensorFlow variable.
     w = session.run(weights)
 
@@ -254,4 +269,6 @@ print_confusion_matrix()
 # with the Notebook without having to restart it.
 session.close()
 
-pass
+end_time = time()
+
+print('Duration: {}'.format(end_time - start_time))
